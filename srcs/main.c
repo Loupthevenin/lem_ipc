@@ -24,10 +24,35 @@ void	display_map(int *map)
 	}
 }
 
+int	place_player(int *map, t_player *player)
+{
+	int	tries;
+	int	x;
+	int	y;
+
+	srand(getpid());
+	tries = 0;
+	while (tries < 100)
+	{
+		x = rand() % MAP_WIDTH;
+		y = rand() % MAP_HEIGHT;
+		if (get_cell(map, x, y) == 0)
+		{
+			set_cell(map, x, y, player->team_id);
+			player->x = x;
+			player->y = y;
+			return (0);
+		}
+		tries++;
+	}
+	return (1);
+}
+
 int	main(int argc, char **argv)
 {
-	int	*map;
-	int	size;
+	int			*map;
+	int			size;
+	t_player	player;
 
 	(void)argc;
 	(void)argv;
@@ -39,10 +64,13 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	ft_memset(map, 0, size);
-	map[get_index(2, 3)] = 1;
-	map[get_index(5, 5)] = 2;
-	map[get_index(0, 0)] = 1;
-	map[get_index(9, 9)] = 3;
+	player.team_id = 1;
+	if (place_player(map, &player) != 0)
+	{
+		ft_putstr_fd("Error: no place for player", 2);
+		free(map);
+		return (1);
+	}
 	display_map(map);
 	free(map);
 	return (0);
