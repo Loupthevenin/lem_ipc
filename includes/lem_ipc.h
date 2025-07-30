@@ -35,6 +35,7 @@ int		place_player(int *map, t_player *player);
 int		get_index(int x, int y);
 int		get_cell(int *map, int x, int y);
 void	set_cell(int *map, int x, int y, int value);
+void	display_map(int *map);
 void	cleanup(t_ipc *ipc);
 
 #endif

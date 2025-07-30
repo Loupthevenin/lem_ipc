@@ -25,3 +25,27 @@ void	cleanup(t_ipc *ipc)
 			ft_putstr_fd("Error: shmctl\n", 2);
 	}
 }
+
+void	display_map(int *map)
+{
+	int	y;
+	int	x;
+	int	val;
+
+	y = 0;
+	while (y < MAP_HEIGHT)
+	{
+		x = 0;
+		while (x < MAP_WIDTH)
+		{
+			val = get_cell(map, x, y);
+			if (val == 0)
+				ft_printf(".");
+			else
+				ft_printf("%d", val);
+			x++;
+		}
+		ft_printf("\n");
+		y++;
+	}
+}
