@@ -13,7 +13,6 @@
 # define MAP_SIZE (MAP_WIDTH * MAP_HEIGHT)
 
 # define SHM_KEY 0x1234
-# define SHM_SIZE (MAP_SIZE * sizeof(int))
 
 typedef struct s_player
 {

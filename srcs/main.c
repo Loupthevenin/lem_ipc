@@ -50,10 +50,13 @@ int	place_player(int *map, t_player *player)
 
 void	init_ipc(t_ipc *ipc)
 {
-	ipc->shmid = shmget(SHM_KEY, SHM_SIZE, IPC_CREAT | IPC_EXCL | 0666);
+	int	size;
+
+	size = MAP_SIZE * sizeof(int);
+	ipc->shmid = shmget(SHM_KEY, size, IPC_CREAT | IPC_EXCL | 0666);
 	if (ipc->shmid == -1)
 	{
-		ipc->shmid = shmget(SHM_KEY, SHM_SIZE, 0666);
+		ipc->shmid = shmget(SHM_KEY, size, 0666);
 		if (ipc->shmid == -1)
 		{
 			ft_putstr_fd("Error: shmget\n", 2);
