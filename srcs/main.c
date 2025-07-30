@@ -48,30 +48,46 @@ int	place_player(int *map, t_player *player)
 	return (1);
 }
 
+void	init_ipc(t_ipc *ipc)
+{
+	ipc->shmid = shmget(SHM_KEY, SHM_SIZE, IPC_CREAT | IPC_EXCL | 0666);
+	if (ipc->shmid == -1)
+	{
+		ipc->shmid = shmget(SHM_KEY, SHM_SIZE, 0666);
+		if (ipc->shmid == -1)
+		{
+			ft_putstr_fd("Error: shmget\n", 2);
+			ipc->map = NULL;
+			return ;
+		}
+		ipc->is_creator = 0;
+	}
+	else
+		ipc->is_creator = 1;
+	ipc->map = (int *)shmat(ipc->shmid, NULL, 0);
+	if (ipc->map == (void *)-1)
+	{
+		ft_putstr_fd("Error: shmat\n", 2);
+		ipc->map = NULL;
+	}
+}
+
 int	main(int argc, char **argv)
 {
-	int			*map;
-	int			size;
+	t_ipc		ipc;
 	t_player	player;
 
 	(void)argc;
 	(void)argv;
-	size = sizeof(int) * MAP_SIZE;
-	map = malloc(size);
-	if (!map)
-	{
-		ft_putstr_fd("Error: malloc", 2);
-		return (1);
-	}
-	ft_memset(map, 0, size);
+	init_ipc(&ipc);
 	player.team_id = 1;
-	if (place_player(map, &player) != 0)
+	if (place_player(ipc.map, &player) != 0)
 	{
-		ft_putstr_fd("Error: no place for player", 2);
-		free(map);
+		ft_putstr_fd("Error: no place for player\n", 2);
+		cleanup(&ipc);
 		return (1);
 	}
-	display_map(map);
-	free(map);
+	display_map(ipc.map);
+	cleanup(&ipc);
 	return (0);
 }
