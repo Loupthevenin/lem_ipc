@@ -22,6 +22,29 @@ static t_point	get_adjacent_position(t_point origin, int direction)
 	return (origin);
 }
 
+static int	count_adjacent_enemies(int *map, t_player *player)
+{
+	int		count;
+	t_point	p;
+	t_point	next;
+	int		val;
+
+	p.x = player->x;
+	p.y = player->y;
+	count = 0;
+	for (int i = 0; i < 4; i++)
+	{
+		next = get_adjacent_position(p, i);
+		if (next.x < 0 || next.x >= MAP_WIDTH || next.y < 0
+			|| next.y >= MAP_HEIGHT)
+			continue ;
+		val = get_cell(map, next.x, next.y);
+		if (val != 0 && val != player->team_id)
+			count++;
+	}
+	return (count);
+}
+
 int	move_player(int *map, t_player *player)
 {
 	t_point	options[4];
@@ -48,6 +71,17 @@ int	move_player(int *map, t_player *player)
 	return (1);
 }
 
+void	kill_player(t_ipc *ipc, t_player *player, const char *reason)
+{
+	set_cell(ipc->map, player->x, player->y, 0);
+	player->alive = 0;
+	ft_printf("Player %d died %s at (%d, %d)\n",
+				player->player_id,
+				reason,
+				player->x,
+				player->y);
+}
+
 void	game_loop(t_ipc *ipc, t_player *player)
 {
 	int	turns;
@@ -57,6 +91,12 @@ void	game_loop(t_ipc *ipc, t_player *player)
 	while (player->alive)
 	{
 		semaphore_wait(ipc->semid);
+		if (count_adjacent_enemies(ipc->map, player) >= 2)
+		{
+			kill_player(ipc, player, "in combat");
+			semaphore_signal(ipc->semid);
+			break ;
+		}
 		move_player(ipc->map, player);
 		display_map(ipc->map);
 		semaphore_signal(ipc->semid);
@@ -64,11 +104,6 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		turns++;
 		// Simulation mort après 10 tours;
 		if (turns == 10)
-		{
-			player->alive = 0;
-			set_cell(ipc->map, player->x, player->y, 0);
-			ft_printf("Player %d died at (%d, %d)\n", player->player_id,
-					player->x, player->y);
-		}
+			kill_player(ipc, player, "(turns 10)");
 	}
 }
