@@ -96,16 +96,22 @@ void	game_loop(t_ipc *ipc, t_player *player)
 
 	turns = 0;
 	(void)player;
-	while (1)
+	while (player->alive)
 	{
 		semaphore_wait(ipc->semid);
 		display_map(ipc->map);
+		// Simulation mort après 10 tours;
+		if (turns == 10)
+		{
+			player->alive = 0;
+			set_cell(ipc->map, player->x, player->y, 0);
+			ft_printf("Player %d died at (%d, %d)\n", player->player_id,
+					player->x, player->y);
+		}
 		// TODO: move player;
 		semaphore_signal(ipc->semid);
 		sleep(1);
 		turns++;
-		if (turns > 10)
-			break ;
 	}
 }
 
@@ -115,6 +121,8 @@ int	main(int argc, char **argv)
 	t_player	player;
 
 	player.team_id = parse_team_id(argc, argv);
+	player.player_id = getpid();
+	player.alive = 1;
 	init_ipc(&ipc);
 	if (!ipc.map)
 		return (1);

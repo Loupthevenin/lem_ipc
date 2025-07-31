@@ -18,9 +18,11 @@
 
 typedef struct s_player
 {
+	int				team_id;
 	int				x;
 	int				y;
-	int				team_id;
+	int				player_id;
+	int				alive;
 }					t_player;
 
 typedef struct s_ipc
