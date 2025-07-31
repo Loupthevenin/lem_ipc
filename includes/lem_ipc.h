@@ -13,6 +13,11 @@
 # define MAP_HEIGHT 10
 # define MAP_SIZE (MAP_WIDTH * MAP_HEIGHT)
 
+# define TOP 0
+# define BOTTOM 1
+# define LEFT 2
+# define RIGHT 3
+
 # define SHM_KEY 0x1234
 # define SEM_KEY 0x1337
 
@@ -32,6 +37,12 @@ typedef struct s_ipc
 	int				semid;
 	int				is_creator;
 }					t_ipc;
+
+typedef struct s_point
+{
+	int				x;
+	int				y;
+}					t_point;
 
 union				semun
 {

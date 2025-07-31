@@ -9,42 +9,42 @@ static int	is_valid_move(int *map, int x, int y)
 	return (1);
 }
 
+static t_point	get_adjacent_position(t_point origin, int direction)
+{
+	if (direction == TOP)
+		return ((t_point){origin.x, origin.y - 1});
+	if (direction == BOTTOM)
+		return ((t_point){origin.x, origin.y + 1});
+	if (direction == LEFT)
+		return ((t_point){origin.x - 1, origin.y});
+	if (direction == RIGHT)
+		return ((t_point){origin.x + 1, origin.y});
+	return (origin);
+}
+
 int	move_player(int *map, t_player *player)
 {
-	int	options_x[4];
-	int	options_y[4];
-	int	count;
-	int	new_x;
-	int	new_y;
-	int	chosen;
+	t_point	options[4];
+	int		count;
+	t_point	next;
+	int		chosen;
 
 	count = 0;
 	for (int i = 0; i < 4; i++)
 	{
-		new_x = player->x;
-		new_y = player->y;
-		if (i == 0)
-			new_y -= 1;
-		else if (i == 1)
-			new_y += 1;
-		else if (i == 2)
-			new_x -= 1;
-		else if (i == 3)
-			new_x += 1;
-		if (is_valid_move(map, new_x, new_y))
-		{
-			options_x[count] = new_x;
-			options_y[count] = new_y;
-			count++;
-		}
+		next = get_adjacent_position((t_point){player->x, player->y}, i);
+		if (is_valid_move(map, next.x, next.y))
+			options[count++] = next;
 	}
 	if (count == 0)
 		return (0);
 	chosen = rand() % count;
+	// Effacer l'ancienne position;
 	set_cell(map, player->x, player->y, 0);
-	set_cell(map, options_x[chosen], options_y[chosen], player->team_id);
-	player->x = options_x[chosen];
-	player->y = options_y[chosen];
+	// Move;
+	set_cell(map, options[chosen].x, options[chosen].y, player->team_id);
+	player->x = options[chosen].x;
+	player->y = options[chosen].y;
 	return (1);
 }
 
