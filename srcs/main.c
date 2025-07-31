@@ -1,5 +1,37 @@
 #include "../includes/lem_ipc.h"
 
+int	parse_team_id(int argc, char **argv)
+{
+	int	team_id;
+
+	if (argc > 2)
+	{
+		ft_putstr_fd("Usage: ./lemipc <team_id>\n", 2);
+		exit(EXIT_FAILURE);
+	}
+	if (argc == 2)
+	{
+		if (!is_number(argv[1]))
+		{
+			ft_putstr_fd("Error: team_id must be a number\n", 2);
+			exit(EXIT_FAILURE);
+		}
+		team_id = ft_atoi(argv[1]);
+		if (team_id < 1 || team_id > 9)
+		{
+			ft_putstr_fd("Error: team_id muste be between 1 and 9\n", 2);
+			exit(EXIT_FAILURE);
+		}
+	}
+	else
+	{
+		srand(getpid());
+		team_id = (rand() % 9) + 1;
+		ft_printf("Random team assigned: %d\n", team_id);
+	}
+	return (team_id);
+}
+
 int	place_player(int *map, t_player *player)
 {
 	int	tries;
@@ -82,12 +114,10 @@ int	main(int argc, char **argv)
 	t_ipc		ipc;
 	t_player	player;
 
-	(void)argc;
-	(void)argv;
+	player.team_id = parse_team_id(argc, argv);
 	init_ipc(&ipc);
 	if (!ipc.map)
 		return (1);
-	player.team_id = 1;
 	semaphore_wait(ipc.semid);
 	if (place_player(ipc.map, &player) != 0)
 	{

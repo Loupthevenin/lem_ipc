@@ -55,4 +55,7 @@ void				set_cell(int *map, int x, int y, int value);
 void				display_map(int *map);
 void				cleanup(t_ipc *ipc);
 
+// Other
+int					is_number(char *str);
+
 #endif

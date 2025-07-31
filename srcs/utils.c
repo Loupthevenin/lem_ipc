@@ -1,5 +1,6 @@
 #include "../includes/lem_ipc.h"
 
+// Map
 int	get_index(int x, int y)
 {
 	return (y * MAP_WIDTH + x);
@@ -13,19 +14,6 @@ int	get_cell(int *map, int x, int y)
 void	set_cell(int *map, int x, int y, int value)
 {
 	map[get_index(x, y)] = value;
-}
-
-void	cleanup(t_ipc *ipc)
-{
-	if (ipc->map)
-		shmdt(ipc->map);
-	if (ipc->is_creator && ipc->shmid != -1)
-	{
-		if (shmctl(ipc->shmid, IPC_RMID, NULL) == -1)
-			ft_putstr_fd("Error: shmctl\n", 2);
-	}
-	if (ipc->is_creator && ipc->semid != -1)
-		destroy_semaphore(ipc->semid);
 }
 
 void	display_map(int *map)
@@ -52,6 +40,7 @@ void	display_map(int *map)
 	}
 }
 
+// Semaphore
 int	create_semaphore(key_t key, int is_creator)
 {
 	int			semid;
@@ -115,4 +104,34 @@ void	destroy_semaphore(int semid)
 {
 	if (semctl(semid, 0, IPC_RMID) == -11)
 		ft_putstr_fd("Error: semctl IPC_RMID", 2);
+}
+
+// Other
+int	is_number(char *str)
+{
+	int	i;
+
+	i = 0;
+	if (!str || !str[0])
+		return (0);
+	while (str[i])
+	{
+		if (!ft_isdigit(str[i]))
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+void	cleanup(t_ipc *ipc)
+{
+	if (ipc->map)
+		shmdt(ipc->map);
+	if (ipc->is_creator && ipc->shmid != -1)
+	{
+		if (shmctl(ipc->shmid, IPC_RMID, NULL) == -1)
+			ft_putstr_fd("Error: shmctl\n", 2);
+	}
+	if (ipc->is_creator && ipc->semid != -1)
+		destroy_semaphore(ipc->semid);
 }
