@@ -43,6 +43,7 @@ union				semun
 
 // MAIN
 int					place_player(int *map, t_player *player);
+void				game_loop(t_ipc *ipc, t_player *player);
 
 // SEMAPHORE
 int					create_semaphore(key_t key, int is_creator);
