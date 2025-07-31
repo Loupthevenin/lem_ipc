@@ -22,6 +22,17 @@ static t_point	get_adjacent_position(t_point origin, int direction)
 	return (origin);
 }
 
+static void	kill_player(t_ipc *ipc, t_player *player, const char *reason)
+{
+	set_cell(ipc->map, player->x, player->y, 0);
+	player->alive = 0;
+	ft_printf("Player %d died %s at (%d, %d)\n",
+				player->player_id,
+				reason,
+				player->x,
+				player->y);
+}
+
 static int	count_adjacent_enemies(int *map, t_player *player)
 {
 	int		count;
@@ -45,7 +56,7 @@ static int	count_adjacent_enemies(int *map, t_player *player)
 	return (count);
 }
 
-int	move_player(int *map, t_player *player)
+static int	move_player(int *map, t_player *player)
 {
 	t_point	options[4];
 	int		count;
@@ -69,17 +80,6 @@ int	move_player(int *map, t_player *player)
 	player->x = options[chosen].x;
 	player->y = options[chosen].y;
 	return (1);
-}
-
-void	kill_player(t_ipc *ipc, t_player *player, const char *reason)
-{
-	set_cell(ipc->map, player->x, player->y, 0);
-	player->alive = 0;
-	ft_printf("Player %d died %s at (%d, %d)\n",
-				player->player_id,
-				reason,
-				player->x,
-				player->y);
 }
 
 void	game_loop(t_ipc *ipc, t_player *player)
