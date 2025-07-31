@@ -169,7 +169,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		display_map(ipc->map);
 		if (count_alive_teams(ipc->map) <= 1)
 		{
-			ft_printf("Game Over\n");
+			ft_printf("Team %d wins the game!\n", player->team_id);
 			semaphore_signal(ipc->semid);
 			break ;
 		}
@@ -177,6 +177,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		sleep(1);
 		turns++;
 		// Simulation mort après 10 tours;
+		// TODO: a changer/delete ?
 		if (turns == 10)
 			kill_player(ipc, player, "(turns 10)");
 	}
