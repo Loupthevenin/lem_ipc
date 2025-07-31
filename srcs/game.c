@@ -56,6 +56,29 @@ static int	count_adjacent_enemies(int *map, t_player *player)
 	return (count);
 }
 
+static int	count_alive_teams(int *map)
+{
+	int	teams[MAX_TEAMS + 1];
+	int	count;
+	int	val;
+
+	count = 0;
+	ft_memset(teams, 0, sizeof(int) * (MAX_TEAMS + 1));
+	for (int y = 0; y < MAP_WIDTH; y++)
+	{
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			val = get_cell(map, x, y);
+			if (val > 0 && teams[val] == 0)
+			{
+				teams[val] = 1;
+				count++;
+			}
+		}
+	}
+	return (count);
+}
+
 static int	move_player(int *map, t_player *player)
 {
 	t_point	options[4];
@@ -82,6 +105,51 @@ static int	move_player(int *map, t_player *player)
 	return (1);
 }
 
+void	wait_for_teams(t_ipc *ipc, int min_teams)
+{
+	int	alive_teams;
+
+	ft_printf("Waiting for at least %d teams to join...\n", min_teams);
+	while (1)
+	{
+		semaphore_wait(ipc->semid);
+		alive_teams = count_alive_teams(ipc->map);
+		semaphore_signal(ipc->semid);
+		ft_printf("\rTeams joined: %d/%d\n", alive_teams, min_teams);
+		if (alive_teams >= min_teams)
+		{
+			semaphore_wait(ipc->semid);
+			*(ipc->game_state) = START;
+			semaphore_signal(ipc->semid);
+			ft_printf("Enough teams joined (%d), starting the game!\n",
+						alive_teams);
+			break ;
+		}
+		sleep(1);
+	}
+}
+
+void	wait_for_start(t_ipc *ipc)
+{
+	int	state;
+
+	ft_printf("Waiting for the game to start...\n");
+	while (1)
+	{
+		semaphore_wait(ipc->semid);
+		state = *(ipc->game_state);
+		semaphore_signal(ipc->semid);
+		ft_printf("Game state: %s\n",
+					state == WAITING ? "Waiting" : "Starting");
+		if (state != WAITING)
+		{
+			ft_printf("Game started\n");
+			break ;
+		}
+		sleep(1);
+	}
+}
+
 void	game_loop(t_ipc *ipc, t_player *player)
 {
 	int	turns;
@@ -99,6 +167,12 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		}
 		move_player(ipc->map, player);
 		display_map(ipc->map);
+		if (count_alive_teams(ipc->map) <= 1)
+		{
+			ft_printf("Game Over\n");
+			semaphore_signal(ipc->semid);
+			break ;
+		}
 		semaphore_signal(ipc->semid);
 		sleep(1);
 		turns++;

@@ -18,6 +18,12 @@
 # define LEFT 2
 # define RIGHT 3
 
+# define WAITING 0
+# define START 1
+# define END 2
+
+# define MAX_TEAMS 9
+
 # define SHM_KEY 0x1234
 # define SEM_KEY 0x1337
 
@@ -36,6 +42,7 @@ typedef struct s_ipc
 	int				shmid;
 	int				semid;
 	int				is_creator;
+	int				*game_state;
 }					t_ipc;
 
 typedef struct s_point
@@ -54,6 +61,8 @@ union				semun
 
 // MAIN
 int					place_player(int *map, t_player *player);
+void				wait_for_teams(t_ipc *ipc, int min_teams);
+void				wait_for_start(t_ipc *ipc);
 void				game_loop(t_ipc *ipc, t_player *player);
 
 // SEMAPHORE

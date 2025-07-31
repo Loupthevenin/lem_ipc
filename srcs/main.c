@@ -57,8 +57,9 @@ int	place_player(int *map, t_player *player)
 void	init_ipc(t_ipc *ipc)
 {
 	int	size;
+	int	*shared_mem;
 
-	size = MAP_SIZE * sizeof(int);
+	size = (MAP_SIZE + 1) * sizeof(int); // + 1 pour le game_state
 	ipc->shmid = shmget(SHM_KEY, size, IPC_CREAT | IPC_EXCL | 0666);
 	if (ipc->shmid == -1)
 	{
@@ -67,23 +68,34 @@ void	init_ipc(t_ipc *ipc)
 		{
 			ft_putstr_fd("Error: shmget\n", 2);
 			ipc->map = NULL;
+			ipc->game_state = NULL;
 			return ;
 		}
 		ipc->is_creator = 0;
 	}
 	else
 		ipc->is_creator = 1;
-	ipc->map = (int *)shmat(ipc->shmid, NULL, 0);
-	if (ipc->map == (void *)-1)
+	shared_mem = (int *)shmat(ipc->shmid, NULL, 0);
+	if (shared_mem == (void *)-1)
 	{
 		ft_putstr_fd("Error: shmat\n", 2);
 		ipc->map = NULL;
+		ipc->game_state = NULL;
+		return ;
+	}
+	ipc->map = shared_mem;
+	ipc->game_state = &shared_mem[MAP_SIZE];
+	if (ipc->is_creator)
+	{
+		ft_memset(ipc->map, 0, MAP_SIZE * sizeof(int));
+		*(ipc->game_state) = WAITING;
 	}
 	ipc->semid = create_semaphore(SEM_KEY, ipc->is_creator);
 	if (ipc->semid == -1)
 	{
 		ft_putstr_fd("Error: failed to create semaphore\n", 2);
 		ipc->map = NULL;
+		ipc->game_state = NULL;
 		return ;
 	}
 }
@@ -109,6 +121,10 @@ int	main(int argc, char **argv)
 		return (1);
 	}
 	semaphore_signal(ipc.semid);
+	if (ipc.is_creator)
+		wait_for_teams(&ipc, 2);
+	else
+		wait_for_start(&ipc);
 	game_loop(&ipc, &player);
 	cleanup(&ipc);
 	return (0);
