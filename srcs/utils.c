@@ -24,6 +24,8 @@ void	cleanup(t_ipc *ipc)
 		if (shmctl(ipc->shmid, IPC_RMID, NULL) == -1)
 			ft_putstr_fd("Error: shmctl\n", 2);
 	}
+	if (ipc->is_creator && ipc->semid != -1)
+		destroy_semaphore(ipc->semid);
 }
 
 void	display_map(int *map)
@@ -48,4 +50,69 @@ void	display_map(int *map)
 		ft_printf("\n");
 		y++;
 	}
+}
+
+int	create_semaphore(key_t key, int is_creator)
+{
+	int			semid;
+	union semun	arg;
+
+	semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0666);
+	if (semid != -1)
+	{
+		if (is_creator)
+		{
+			arg.val = 1;
+			if (semctl(semid, 0, SETVAL, arg) == -1)
+			{
+				ft_putstr_fd("Error: semctl SETVAL\n", 2);
+				return (-1);
+			}
+		}
+	}
+	else
+	{
+		// S'il existe déjà, on le récupère
+		semid = semget(key, 1, 0666);
+		if (semid == -1)
+		{
+			ft_putstr_fd("Error: semget fallback\n", 2);
+			return (-1);
+		}
+	}
+	return (semid);
+}
+
+void	semaphore_wait(int semid)
+{
+	struct sembuf	sb;
+
+	sb.sem_num = 0;
+	sb.sem_op = -1;
+	sb.sem_flg = 0;
+	if (semop(semid, &sb, 1) == -1)
+	{
+		ft_putstr_fd("Error: semop wait\n", 2);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void	semaphore_signal(int semid)
+{
+	struct sembuf	sb;
+
+	sb.sem_num = 0;
+	sb.sem_op = 1;
+	sb.sem_flg = 0;
+	if (semop(semid, &sb, 1) == -1)
+	{
+		ft_putstr_fd("Error: semop signal", 2);
+		exit(EXIT_FAILURE);
+	}
+}
+
+void	destroy_semaphore(int semid)
+{
+	if (semctl(semid, 0, IPC_RMID) == -11)
+		ft_putstr_fd("Error: semctl IPC_RMID", 2);
 }
