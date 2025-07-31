@@ -49,6 +49,32 @@ void	init_ipc(t_ipc *ipc)
 		ft_putstr_fd("Error: shmat\n", 2);
 		ipc->map = NULL;
 	}
+	ipc->semid = create_semaphore(SEM_KEY, ipc->is_creator);
+	if (ipc->semid == -1)
+	{
+		ft_putstr_fd("Error: failed to create semaphore\n", 2);
+		ipc->map = NULL;
+		return ;
+	}
+}
+
+void	game_loop(t_ipc *ipc, t_player *player)
+{
+	int	turns;
+
+	turns = 0;
+	(void)player;
+	while (1)
+	{
+		semaphore_wait(ipc->semid);
+		display_map(ipc->map);
+		// TODO: move player;
+		semaphore_signal(ipc->semid);
+		sleep(1);
+		turns++;
+		if (turns > 10)
+			break ;
+	}
 }
 
 int	main(int argc, char **argv)
@@ -59,14 +85,19 @@ int	main(int argc, char **argv)
 	(void)argc;
 	(void)argv;
 	init_ipc(&ipc);
+	if (!ipc.map)
+		return (1);
 	player.team_id = 1;
+	semaphore_wait(ipc.semid);
 	if (place_player(ipc.map, &player) != 0)
 	{
 		ft_putstr_fd("Error: no place for player\n", 2);
+		semaphore_signal(ipc.semid);
 		cleanup(&ipc);
 		return (1);
 	}
-	display_map(ipc.map);
+	semaphore_signal(ipc.semid);
+	game_loop(&ipc, &player);
 	cleanup(&ipc);
 	return (0);
 }
