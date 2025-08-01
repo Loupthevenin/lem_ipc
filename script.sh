@@ -76,28 +76,53 @@ function two_teams_game() {
 	kill_all_players
 }
 
+function unbalanced_teams_game() {
+	echo "=== Unbalanced Teams Game Test ==="
+	read -p "Team 1 ID: " t1
+	read -p "Number of players in Team $t1: " t1_count
+	read -p "Team 2 ID: " t2
+	read -p "Number of players in Team $t2: " t2_count
+
+	total=$((t1_count + t2_count))
+	pids=()
+
+	echo "Launching $total players: $t1_count in Team $t1, $t2_count in Team $t2..."
+
+	for ((i = 0; i < t1_count; i++)); do
+		$BIN $t1 &
+		pids+=($!)
+		sleep 0.1
+	done
+	for ((i = 0; i < t2_count; i++)); do
+		$BIN $t2 &
+		pids+=($!)
+		sleep 0.1
+	done
+}
+
 function main_menu() {
 	clear
 	echo "==== LEMIPC Test Runner ===="
 	echo "1. Stress Test ($NUM_PLAYERS players)"
 	echo "2. SIGINT Test (clean exit)"
 	echo "3. Two Teams Game (1 vs 2)"
-	echo "4. Custom Player Count Test"
-	echo "5. Exit"
+	echo "4. Unbalanced Teams Game"
+	echo "5. Custom Player Count Test"
+	echo "6. Exit"
 	read -p "Choose a test: " choice
 
 	case $choice in
 	1) stress_test ;;
 	2) sigint_test ;;
 	3) two_teams_game ;;
-	4)
+	4) unbalanced_teams_game ;;
+	5)
 		read -p "Number of total players: " custom_players
 		read -p "Team 1 number: " t1
 		read -p "Team 2 number: " t2
 		launch_players "$t1" "$t2" "$custom_players"
 		;;
-	5) exit 0 ;;
-	*) echo "Invalid choice" ;;
+	6) exit 0 ;;
 	esac
 }
 
