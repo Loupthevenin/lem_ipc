@@ -33,6 +33,7 @@ int	parse_team_id(int argc, char **argv)
 	return (team_id);
 }
 
+// TODO: Actuellement l'ordre est random mais on peut placer les joueurs de manière a ce qu'il n'y ai pas de collision dès le depart;
 int	place_player(int *map, t_player *player)
 {
 	int	tries;
