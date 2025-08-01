@@ -168,10 +168,6 @@ void	wait_for_start(t_ipc *ipc)
 
 void	game_loop(t_ipc *ipc, t_player *player)
 {
-	int	turns;
-
-	turns = 0;
-	(void)player;
 	while (player->alive)
 	{
 		semaphore_wait(ipc->semid);
@@ -191,10 +187,5 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		}
 		semaphore_signal(ipc->semid);
 		sleep(1);
-		turns++;
-		// Simulation mort après 10 tours;
-		// TODO: a changer/delete ?
-		if (turns == 10)
-			kill_player(ipc, player, "(turns 10)");
 	}
 }
