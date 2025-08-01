@@ -14,6 +14,7 @@ sleep 15 # attendre que le jeu tourne un peu
 echo "== Killing all players =="
 for pid in "${pids[@]}"; do
 	kill -INT "$pid" 2>/dev/null
+	sleep 0.05
 done
 
 wait

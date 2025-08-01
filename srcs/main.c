@@ -131,7 +131,7 @@ int	main(int argc, char **argv)
 	if (!g_exit)
 		game_loop(&ipc, &player);
 	if (g_exit)
-		ft_printf("\nSIGINT received, exiting gracefully...\n");
+		safe_print(&ipc, "SIGINT received, exiting gracefully...");
 	cleanup(&ipc);
 	return (0);
 }

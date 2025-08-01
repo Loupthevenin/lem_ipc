@@ -125,20 +125,22 @@ void	wait_for_teams(t_ipc *ipc, t_player *player, int min_teams)
 {
 	int	alive_teams;
 
+	semaphore_wait(ipc->semid);
 	ft_printf("Waiting for at least %d teams to join...\n", min_teams);
+	semaphore_signal(ipc->semid);
 	while (!g_exit)
 	{
 		semaphore_wait(ipc->semid);
 		alive_teams = count_alive_teams(ipc->map);
+		ft_printf("Teams joined: %d/%d\n", alive_teams, min_teams);
 		semaphore_signal(ipc->semid);
-		ft_printf("\rTeams joined: %d/%d\n", alive_teams, min_teams);
 		if (alive_teams >= min_teams)
 		{
 			semaphore_wait(ipc->semid);
 			*(ipc->game_state) = START;
-			semaphore_signal(ipc->semid);
 			ft_printf("Enough teams joined (%d), starting the game!\n",
 						alive_teams);
+			semaphore_signal(ipc->semid);
 			break ;
 		}
 		sleep(1);
@@ -155,17 +157,21 @@ void	wait_for_start(t_ipc *ipc, t_player *player)
 {
 	int	state;
 
+	semaphore_wait(ipc->semid);
 	ft_printf("Waiting for the game to start...\n");
+	semaphore_signal(ipc->semid);
 	while (!g_exit)
 	{
 		semaphore_wait(ipc->semid);
 		state = *(ipc->game_state);
-		semaphore_signal(ipc->semid);
 		ft_printf("Game state: %s\n",
 					state == WAITING ? "Waiting" : "Starting");
+		semaphore_signal(ipc->semid);
 		if (state != WAITING)
 		{
+			semaphore_wait(ipc->semid);
 			ft_printf("Game started\n");
+			semaphore_signal(ipc->semid);
 			break ;
 		}
 		sleep(1);
@@ -180,12 +186,21 @@ void	wait_for_start(t_ipc *ipc, t_player *player)
 
 void	game_loop(t_ipc *ipc, t_player *player)
 {
+	int	state;
+
 	while (player->alive)
 	{
 		semaphore_wait(ipc->semid);
 		if (g_exit && player->alive)
 		{
 			kill_player(ipc, player, "SIGINT");
+			semaphore_signal(ipc->semid);
+			break ;
+		}
+		state = *(ipc->game_state);
+		if (state == END && player->alive)
+		{
+			kill_player(ipc, player, "game ended");
 			semaphore_signal(ipc->semid);
 			break ;
 		}
@@ -200,6 +215,8 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		if (count_alive_teams(ipc->map) <= 1)
 		{
 			ft_printf("Team %d wins the game!\n", player->team_id);
+			*(ipc->game_state) = END;
+			kill_player(ipc, player, "game ended");
 			semaphore_signal(ipc->semid);
 			break ;
 		}

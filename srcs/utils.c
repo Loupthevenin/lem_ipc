@@ -133,21 +133,25 @@ void	handle_sigint(int sig)
 	g_exit = 1;
 }
 
+void	safe_print(t_ipc *ipc, char *msg)
+{
+	semaphore_wait(ipc->semid);
+	ft_printf("%s\n", msg);
+	semaphore_signal(ipc->semid);
+}
+
 void	cleanup(t_ipc *ipc)
 {
 	int	alive_players;
 
 	semaphore_wait(ipc->semid);
 	alive_players = count_alive_players(ipc->map);
+	ft_printf("alive_players: %d\n", alive_players);
 	semaphore_signal(ipc->semid);
 	if (ipc->map)
 		shmdt(ipc->map);
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
-	ft_printf("alive_players: %d\n", alive_players);
 	if (alive_players == 0)
-	{
-		ft_printf("Last player exited, cleaning IPC resources.\n");
 		destroy_ipc_resources(ipc->shmid, ipc->semid);
-	}
 }

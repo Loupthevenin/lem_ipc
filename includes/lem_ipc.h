@@ -81,6 +81,7 @@ int								get_index(int x, int y);
 int								get_cell(int *map, int x, int y);
 void							set_cell(int *map, int x, int y, int value);
 void							display_map(int *map);
+void							safe_print(t_ipc *ipc, char *msg);
 int								count_alive_players(int *map);
 void							cleanup(t_ipc *ipc);
 
