@@ -127,17 +127,26 @@ int	is_number(char *str)
 	return (1);
 }
 
+void	handle_sigint(int sig)
+{
+	(void)sig;
+	g_exit_requested = 1;
+	ft_putstr_fd("\nSIGINT received, exiting...\n", 1);
+}
+
 void	cleanup(t_ipc *ipc)
 {
 	int	alive_players;
 
-	if (ipc->map)
-		shmdt(ipc->map);
 	semaphore_wait(ipc->semid);
 	alive_players = count_alive_players(ipc->map);
 	semaphore_signal(ipc->semid);
-	ft_printf("alive_players: %d", alive_players);
-	if (alive_players == 0)
+	if (ipc->map)
+		shmdt(ipc->map);
+	if (ipc->game_state)
+		shmdt(ipc->game_state);
+	ft_printf("alive_players: %d\n", alive_players);
+	if (alive_players <= 1)
 	{
 		ft_printf("Last player exited, cleaning IPC resources.\n");
 		destroy_ipc_resources(ipc->shmid, ipc->semid);

@@ -1,5 +1,7 @@
 #include "../includes/lem_ipc.h"
 
+volatile sig_atomic_t	g_exit_requested = 0;
+
 int	parse_team_id(int argc, char **argv)
 {
 	int	team_id;
@@ -106,6 +108,7 @@ int	main(int argc, char **argv)
 	t_player	player;
 
 	srand(getpid());
+	signal(SIGINT, handle_sigint);
 	player.team_id = parse_team_id(argc, argv);
 	player.player_id = getpid();
 	player.alive = 1;
@@ -125,7 +128,8 @@ int	main(int argc, char **argv)
 		wait_for_teams(&ipc, MIN_TEAMS_TO_START);
 	else
 		wait_for_start(&ipc);
-	game_loop(&ipc, &player);
+	if (!g_exit_requested)
+		game_loop(&ipc, &player);
 	cleanup(&ipc);
 	return (0);
 }

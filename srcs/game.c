@@ -126,7 +126,7 @@ void	wait_for_teams(t_ipc *ipc, int min_teams)
 	int	alive_teams;
 
 	ft_printf("Waiting for at least %d teams to join...\n", min_teams);
-	while (1)
+	while (!g_exit_requested)
 	{
 		semaphore_wait(ipc->semid);
 		alive_teams = count_alive_teams(ipc->map);
@@ -150,7 +150,7 @@ void	wait_for_start(t_ipc *ipc)
 	int	state;
 
 	ft_printf("Waiting for the game to start...\n");
-	while (1)
+	while (!g_exit_requested)
 	{
 		semaphore_wait(ipc->semid);
 		state = *(ipc->game_state);
@@ -168,7 +168,7 @@ void	wait_for_start(t_ipc *ipc)
 
 void	game_loop(t_ipc *ipc, t_player *player)
 {
-	while (player->alive)
+	while (player->alive && !g_exit_requested)
 	{
 		semaphore_wait(ipc->semid);
 		if (count_adjacent_enemies(ipc->map, player) >= 2)
