@@ -100,10 +100,14 @@ void	semaphore_signal(int semid)
 	}
 }
 
-void	destroy_semaphore(int semid)
+void	destroy_ipc_resources(int shmid, int semid)
 {
-	if (semctl(semid, 0, IPC_RMID) == -11)
-		ft_putstr_fd("Error: semctl IPC_RMID", 2);
+	if (shmid != -1)
+		if (shmctl(shmid, IPC_RMID, NULL) == -1)
+			ft_putstr_fd("Error: shmctl IPC_RMID\n", 2);
+	if (semid != -1)
+		if (semctl(semid, 0, IPC_RMID) == -1)
+			ft_putstr_fd("Error: semctl IPC_RMID\n", 2);
 }
 
 // Other
@@ -125,13 +129,17 @@ int	is_number(char *str)
 
 void	cleanup(t_ipc *ipc)
 {
+	int	alive_players;
+
 	if (ipc->map)
 		shmdt(ipc->map);
-	if (ipc->is_creator && ipc->shmid != -1)
+	semaphore_wait(ipc->semid);
+	alive_players = count_alive_players(ipc->map);
+	semaphore_signal(ipc->semid);
+	ft_printf("alive_players: %d", alive_players);
+	if (alive_players == 0)
 	{
-		if (shmctl(ipc->shmid, IPC_RMID, NULL) == -1)
-			ft_putstr_fd("Error: shmctl\n", 2);
+		ft_printf("Last player exited, cleaning IPC resources.\n");
+		destroy_ipc_resources(ipc->shmid, ipc->semid);
 	}
-	if (ipc->is_creator && ipc->semid != -1)
-		destroy_semaphore(ipc->semid);
 }

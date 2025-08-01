@@ -105,6 +105,22 @@ static int	move_player(int *map, t_player *player)
 	return (1);
 }
 
+int	count_alive_players(int *map)
+{
+	int	count;
+	int	i;
+
+	count = 0;
+	i = 0;
+	while (i < MAP_SIZE)
+	{
+		if (map[i] > 0)
+			count++;
+		i++;
+	}
+	return (count);
+}
+
 void	wait_for_teams(t_ipc *ipc, int min_teams)
 {
 	int	alive_teams;
