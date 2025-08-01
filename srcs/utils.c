@@ -175,7 +175,6 @@ void	cleanup(t_ipc *ipc)
 
 	semaphore_wait(ipc->semid);
 	alive_players = count_alive_players(ipc->map);
-	ft_printf("alive_players: %d\n", alive_players);
 	semaphore_signal(ipc->semid);
 	if (ipc->map)
 		shmdt(ipc->map);

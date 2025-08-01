@@ -106,9 +106,58 @@ static t_point	find_average_position(t_point *positions, int count)
 	return ((t_point){sum_x / count, sum_y / count});
 }
 
+static int	is_group_formed(t_point *positions, int count, t_point center)
+{
+	int	i;
+	int	close_count;
+	int	dist;
+
+	close_count = 0;
+	i = 0;
+	while (i < count)
+	{
+		dist = abs(positions[i].x - center.x) + abs(positions[i].y - center.y);
+		if (dist <= 4)
+			close_count++;
+		i++;
+	}
+	return (close_count >= 3);
+}
+
+static t_point	find_closest_enemy(t_ipc *ipc, t_player *player)
+{
+	t_point	closest;
+	int		min_dist;
+	int		cell;
+	int		dist;
+
+	min_dist = 100000;
+	closest.x = -1;
+	closest.y = -1;
+	for (int y = 0; y < MAP_HEIGHT; y++)
+	{
+		for (int x = 0; x < MAP_WIDTH; x++)
+		{
+			cell = get_cell(ipc->map, x, y);
+			if (cell != 0 && cell != player->team_id)
+			{
+				dist = abs(player->x - x) + abs(player->y - y);
+				if (dist < min_dist)
+				{
+					min_dist = dist;
+					closest.x = x;
+					closest.y = y;
+				}
+			}
+		}
+	}
+	return (closest);
+}
+
 int	move_player(t_ipc *ipc, t_player *player)
 {
 	t_point	target;
+	t_point	enemy;
 	int		ally_count;
 	t_msg	buffer[10];
 	t_point	positions[10];
@@ -123,7 +172,16 @@ int	move_player(t_ipc *ipc, t_player *player)
 			positions[i].y = buffer[i].y;
 		}
 		target = find_average_position(positions, ally_count);
-		result = move_towards(ipc, player, target);
+		if (is_group_formed(positions, ally_count, target))
+		{
+			enemy = find_closest_enemy(ipc, player);
+			if (enemy.x != -1 && enemy.y != -1)
+				result = move_towards(ipc, player, enemy);
+			else
+				result = random_move(ipc, player);
+		}
+		else
+			result = move_towards(ipc, player, target);
 	}
 	else
 		result = random_move(ipc, player);
