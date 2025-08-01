@@ -4,6 +4,8 @@ BIN="./lemipc"
 NUM_PLAYERS=10
 WAIT_TIME=15
 
+trap 'echo "SIGINT caught, killing players..."; kill_all_players; exit 1' SIGINT
+
 function launch_players() {
 	local team1=$1
 	local team2=$2
@@ -20,6 +22,10 @@ function launch_players() {
 }
 
 function kill_all_players() {
+	if [ ${#pids[@]} -eq 0 ]; then
+		echo "No players to kill."
+		return
+	fi
 	echo "== Killing all players =="
 	for pid in "${pids[@]}"; do
 		kill -INT "$pid" 2>/dev/null
@@ -27,6 +33,7 @@ function kill_all_players() {
 	done
 	wait
 	check_ipcs
+	pids=() # reset pids after killing
 }
 
 function check_ipcs() {
