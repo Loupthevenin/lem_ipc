@@ -81,11 +81,18 @@ void							wait_for_teams(t_ipc *ipc, t_player *player,
 									int min_teams);
 void							wait_for_start(t_ipc *ipc, t_player *player);
 void							game_loop(t_ipc *ipc, t_player *player);
+int								move_player(t_ipc *ipc, t_player *player);
 
 // SEMAPHORE
 int								create_semaphore(key_t key, int is_creator);
 void							semaphore_wait(int semid);
 void							semaphore_signal(int semid);
+
+// MSGQ
+int	send_player_position(t_ipc *ipc,
+							t_player *player);
+int								received_team_position(t_ipc *ipc, int team_id,
+									t_msg *buffer, int max);
 
 // UTILS
 int								get_index(int x, int y);

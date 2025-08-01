@@ -1,14 +1,5 @@
 #include "../includes/lem_ipc.h"
 
-static int	is_valid_move(int *map, int x, int y)
-{
-	if (x < 0 || x >= MAP_WIDTH || y < 0 || y >= MAP_HEIGHT)
-		return (0);
-	if (get_cell(map, x, y) != 0)
-		return (0);
-	return (1);
-}
-
 static t_point	get_adjacent_position(t_point origin, int direction)
 {
 	if (direction == TOP)
@@ -77,32 +68,6 @@ static int	count_alive_teams(int *map)
 		}
 	}
 	return (count);
-}
-
-static int	move_player(int *map, t_player *player)
-{
-	t_point	options[4];
-	int		count;
-	t_point	next;
-	int		chosen;
-
-	count = 0;
-	for (int i = 0; i < 4; i++)
-	{
-		next = get_adjacent_position((t_point){player->x, player->y}, i);
-		if (is_valid_move(map, next.x, next.y))
-			options[count++] = next;
-	}
-	if (count == 0)
-		return (0);
-	chosen = rand() % count;
-	// Effacer l'ancienne position;
-	set_cell(map, player->x, player->y, 0);
-	// Move;
-	set_cell(map, options[chosen].x, options[chosen].y, player->team_id);
-	player->x = options[chosen].x;
-	player->y = options[chosen].y;
-	return (1);
 }
 
 int	count_alive_players(int *map)
@@ -210,7 +175,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 			semaphore_signal(ipc->semid);
 			break ;
 		}
-		move_player(ipc->map, player);
+		move_player(ipc, player);
 		display_map(ipc->map);
 		if (count_alive_teams(ipc->map) <= 1)
 		{
