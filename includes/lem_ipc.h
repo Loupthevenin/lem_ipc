@@ -61,12 +61,13 @@ union							semun
 	struct seminfo				*__buf;
 };
 
-extern volatile sig_atomic_t	g_exit_requested;
+extern volatile sig_atomic_t	g_exit;
 
 // MAIN
 int								place_player(int *map, t_player *player);
-void							wait_for_teams(t_ipc *ipc, int min_teams);
-void							wait_for_start(t_ipc *ipc);
+void							wait_for_teams(t_ipc *ipc, t_player *player,
+									int min_teams);
+void							wait_for_start(t_ipc *ipc, t_player *player);
 void							game_loop(t_ipc *ipc, t_player *player);
 
 // SEMAPHORE

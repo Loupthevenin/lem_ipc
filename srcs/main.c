@@ -1,6 +1,6 @@
 #include "../includes/lem_ipc.h"
 
-volatile sig_atomic_t	g_exit_requested = 0;
+volatile sig_atomic_t	g_exit = 0;
 
 int	parse_team_id(int argc, char **argv)
 {
@@ -40,7 +40,7 @@ int	place_player(int *map, t_player *player)
 	int	y;
 
 	tries = 0;
-	while (tries < 100)
+	while (tries < MAP_SIZE)
 	{
 		x = rand() % MAP_WIDTH;
 		y = rand() % MAP_HEIGHT;
@@ -53,7 +53,7 @@ int	place_player(int *map, t_player *player)
 		}
 		tries++;
 	}
-	return (1);
+	return (-1);
 }
 
 void	init_ipc(t_ipc *ipc)
@@ -125,11 +125,13 @@ int	main(int argc, char **argv)
 	}
 	semaphore_signal(ipc.semid);
 	if (ipc.is_creator)
-		wait_for_teams(&ipc, MIN_TEAMS_TO_START);
+		wait_for_teams(&ipc, &player, MIN_TEAMS_TO_START);
 	else
-		wait_for_start(&ipc);
-	if (!g_exit_requested)
+		wait_for_start(&ipc, &player);
+	if (!g_exit)
 		game_loop(&ipc, &player);
+	if (g_exit)
+		ft_printf("\nSIGINT received, exiting gracefully...\n");
 	cleanup(&ipc);
 	return (0);
 }

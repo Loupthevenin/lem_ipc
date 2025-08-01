@@ -130,8 +130,7 @@ int	is_number(char *str)
 void	handle_sigint(int sig)
 {
 	(void)sig;
-	g_exit_requested = 1;
-	ft_putstr_fd("\nSIGINT received, exiting...\n", 1);
+	g_exit = 1;
 }
 
 void	cleanup(t_ipc *ipc)
@@ -146,7 +145,7 @@ void	cleanup(t_ipc *ipc)
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
 	ft_printf("alive_players: %d\n", alive_players);
-	if (alive_players <= 1)
+	if (alive_players == 0)
 	{
 		ft_printf("Last player exited, cleaning IPC resources.\n");
 		destroy_ipc_resources(ipc->shmid, ipc->semid);
