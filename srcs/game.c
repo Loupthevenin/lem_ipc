@@ -24,6 +24,31 @@ static void	kill_player(t_ipc *ipc, t_player *player, const char *reason)
 				player->y);
 }
 
+static void	print_team_win(int team_id)
+{
+	const char	*color;
+
+	switch (team_id)
+	{
+	case 1:
+		color = RED;
+		break ;
+	case 2:
+		color = GREEN;
+		break ;
+	case 3:
+		color = YELLOW;
+		break ;
+	case 4:
+		color = BLUE;
+		break ;
+	default:
+		color = RESET;
+		break ;
+	}
+	ft_printf("%sTeam %d wins the game!%s\n", color, team_id, RESET);
+}
+
 static int	count_adjacent_enemies(int *map, t_player *player)
 {
 	int		count;
@@ -179,7 +204,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		display_map(ipc->map);
 		if (count_alive_teams(ipc->map) <= 1)
 		{
-			ft_printf("Team %d wins the game!\n", player->team_id);
+			print_team_win(player->team_id);
 			*(ipc->game_state) = END;
 			kill_player(ipc, player, "game ended");
 			semaphore_signal(ipc->semid);

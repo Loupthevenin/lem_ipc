@@ -40,7 +40,25 @@ void	display_map(int *map)
 			if (val == 0)
 				ft_printf(". ");
 			else
-				ft_printf("%d ", val);
+			{
+				switch (val)
+				{
+				case 1:
+					ft_printf(RED "%d " RESET, val);
+					break ;
+				case 2:
+					ft_printf(GREEN "%d " RESET, val);
+					break ;
+				case 3:
+					ft_printf(YELLOW "%d " RESET, val);
+					break ;
+				case 4:
+					ft_printf(BLUE "%d " RESET, val);
+					break ;
+				default:
+					ft_printf("%d ", val);
+				}
+			}
 			x++;
 		}
 		ft_printf("\n");
