@@ -88,50 +88,45 @@ static int	move_towards(t_ipc *ipc, t_player *player, t_point target)
 	return (1);
 }
 
-static t_point	find_closest_teammate(t_ipc *ipc, t_player *player)
+static t_point	find_average_position(t_point *positions, int count)
 {
-	int		min_dist;
-	int		dist;
-	int		x;
-	int		y;
-	t_point	closest;
+	int	sum_x;
+	int	sum_y;
+	int	i;
 
-	min_dist = 100000;
-	closest.x = -1;
-	closest.y = -1;
-	y = 0;
-	while (y < MAP_HEIGHT)
+	sum_x = 0;
+	sum_y = 0;
+	i = 0;
+	while (i < count)
 	{
-		x = 0;
-		while (x < MAP_WIDTH)
-		{
-			if (get_cell(ipc->map, x, y) == player->team_id && !(x == player->x
-					&& y == player->y))
-			{
-				dist = abs(x - player->x) + abs(y - player->y);
-				if (dist < min_dist)
-				{
-					min_dist = dist;
-					closest = (t_point){x, y};
-				}
-			}
-			x++;
-		}
-		y++;
+		sum_x += positions[i].x;
+		sum_y += positions[i].y;
+		i++;
 	}
-	return (closest);
+	return ((t_point){sum_x / count, sum_y / count});
 }
 
 int	move_player(t_ipc *ipc, t_player *player)
 {
 	t_point	target;
+	int		ally_count;
+	t_msg	buffer[10];
+	t_point	positions[10];
 	int		result;
 
-	target = find_closest_teammate(ipc, player);
-	if (target.x == -1 && target.y == -1)
-		result = random_move(ipc, player);
-	else
+	ally_count = received_team_position(ipc, player->team_id, buffer, 10);
+	if (ally_count > 0)
+	{
+		for (int i = 0; i < ally_count; i++)
+		{
+			positions[i].x = buffer[i].x;
+			positions[i].y = buffer[i].y;
+		}
+		target = find_average_position(positions, ally_count);
 		result = move_towards(ipc, player, target);
+	}
+	else
+		result = random_move(ipc, player);
 	send_player_position(ipc, player);
 	return (result);
 }
