@@ -23,16 +23,23 @@ void	display_map(int *map)
 	int	val;
 
 	y = 0;
+	/* system("clear"); */
+	ft_printf("   ");
+	x = 0;
+	while (x < MAP_WIDTH)
+		ft_printf("%d ", x++);
+	ft_printf("\n");
 	while (y < MAP_HEIGHT)
 	{
 		x = 0;
+		ft_printf("%d  ", y);
 		while (x < MAP_WIDTH)
 		{
 			val = get_cell(map, x, y);
 			if (val == 0)
-				ft_printf(".");
+				ft_printf(". ");
 			else
-				ft_printf("%d", val);
+				ft_printf("%d ", val);
 			x++;
 		}
 		ft_printf("\n");
