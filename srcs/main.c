@@ -100,6 +100,18 @@ void	init_ipc(t_ipc *ipc)
 		ipc->game_state = NULL;
 		return ;
 	}
+	ipc->msgid = msgget(MSG_KEY, IPC_CREAT | IPC_EXCL | 0666);
+	if (ipc->msgid == -1)
+	{
+		ipc->msgid = msgget(MSG_KEY, 0666);
+		if (ipc->msgid == -1)
+		{
+			ft_putstr_fd("Error: msgget\n", 2);
+			ipc->map = NULL;
+			ipc->game_state = NULL;
+			return ;
+		}
+	}
 }
 
 int	main(int argc, char **argv)

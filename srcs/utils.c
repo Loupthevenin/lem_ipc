@@ -23,6 +23,7 @@ void	display_map(int *map)
 	int	val;
 
 	y = 0;
+	// TODO: Mettre en place le visual avec le clear en argv ? bonus ?;
 	/* system("clear"); */
 	ft_printf("   ");
 	x = 0;
@@ -107,7 +108,7 @@ void	semaphore_signal(int semid)
 	}
 }
 
-void	destroy_ipc_resources(int shmid, int semid)
+void	destroy_ipc_resources(int shmid, int semid, int msgid)
 {
 	if (shmid != -1)
 		if (shmctl(shmid, IPC_RMID, NULL) == -1)
@@ -115,6 +116,9 @@ void	destroy_ipc_resources(int shmid, int semid)
 	if (semid != -1)
 		if (semctl(semid, 0, IPC_RMID) == -1)
 			ft_putstr_fd("Error: semctl IPC_RMID\n", 2);
+	if (msgid != -1)
+		if (msgctl(msgid, IPC_RMID, NULL) == -1)
+			ft_putstr_fd("Error: msgctl IPC_RMID\n", 2);
 }
 
 // Other
@@ -160,5 +164,5 @@ void	cleanup(t_ipc *ipc)
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
 	if (alive_players == 0)
-		destroy_ipc_resources(ipc->shmid, ipc->semid);
+		destroy_ipc_resources(ipc->shmid, ipc->semid, ipc->msgid);
 }

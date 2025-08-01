@@ -5,6 +5,7 @@
 # include "../libft/libft.h"
 # include <signal.h>
 # include <sys/ipc.h>
+# include <sys/msg.h>
 # include <sys/sem.h>
 # include <sys/shm.h>
 # include <sys/types.h>
@@ -28,6 +29,17 @@
 
 # define SHM_KEY 0x1234
 # define SEM_KEY 0x1337
+# define MSG_KEY 0x1558
+
+typedef struct s_ipc
+{
+	int							*map;
+	int							shmid;
+	int							semid;
+	int							msgid;
+	int							is_creator;
+	int							*game_state;
+}								t_ipc;
 
 typedef struct s_player
 {
@@ -38,14 +50,13 @@ typedef struct s_player
 	int							alive;
 }								t_player;
 
-typedef struct s_ipc
+typedef struct s_msg
 {
-	int							*map;
-	int							shmid;
-	int							semid;
-	int							is_creator;
-	int							*game_state;
-}								t_ipc;
+	long						mtype;
+	int							team_id;
+	int							x;
+	int							y;
+}								t_msg;
 
 typedef struct s_point
 {
@@ -74,7 +85,6 @@ void							game_loop(t_ipc *ipc, t_player *player);
 int								create_semaphore(key_t key, int is_creator);
 void							semaphore_wait(int semid);
 void							semaphore_signal(int semid);
-void							destroy_semaphore(int semid);
 
 // UTILS
 int								get_index(int x, int y);
@@ -83,6 +93,8 @@ void							set_cell(int *map, int x, int y, int value);
 void							display_map(int *map);
 void							safe_print(t_ipc *ipc, char *msg);
 int								count_alive_players(int *map);
+void							destroy_ipc_resources(int shmid, int semid,
+									int msgid);
 void							cleanup(t_ipc *ipc);
 
 // Other
