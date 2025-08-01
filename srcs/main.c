@@ -122,7 +122,7 @@ int	main(int argc, char **argv)
 	}
 	semaphore_signal(ipc.semid);
 	if (ipc.is_creator)
-		wait_for_teams(&ipc, 2);
+		wait_for_teams(&ipc, MIN_TEAMS_TO_START);
 	else
 		wait_for_start(&ipc);
 	game_loop(&ipc, &player);

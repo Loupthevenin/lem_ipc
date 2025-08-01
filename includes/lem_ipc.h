@@ -22,6 +22,7 @@
 # define START 1
 # define END 2
 
+# define MIN_TEAMS_TO_START 4
 # define MAX_TEAMS 9
 
 # define SHM_KEY 0x1234
