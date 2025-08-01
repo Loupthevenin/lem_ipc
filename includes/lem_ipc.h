@@ -75,6 +75,7 @@ union							semun
 extern volatile sig_atomic_t	g_exit;
 
 // MAIN
+void							init_ipc(t_ipc *ipc);
 int								place_player(int *map, t_player *player);
 void							wait_for_teams(t_ipc *ipc, t_player *player,
 									int min_teams);

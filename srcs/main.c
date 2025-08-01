@@ -56,64 +56,6 @@ int	place_player(int *map, t_player *player)
 	return (-1);
 }
 
-void	init_ipc(t_ipc *ipc)
-{
-	int	size;
-	int	*shared_mem;
-
-	size = (MAP_SIZE + 1) * sizeof(int); // + 1 pour le game_state
-	ipc->shmid = shmget(SHM_KEY, size, IPC_CREAT | IPC_EXCL | 0666);
-	if (ipc->shmid == -1)
-	{
-		ipc->shmid = shmget(SHM_KEY, size, 0666);
-		if (ipc->shmid == -1)
-		{
-			ft_putstr_fd("Error: shmget\n", 2);
-			ipc->map = NULL;
-			ipc->game_state = NULL;
-			return ;
-		}
-		ipc->is_creator = 0;
-	}
-	else
-		ipc->is_creator = 1;
-	shared_mem = (int *)shmat(ipc->shmid, NULL, 0);
-	if (shared_mem == (void *)-1)
-	{
-		ft_putstr_fd("Error: shmat\n", 2);
-		ipc->map = NULL;
-		ipc->game_state = NULL;
-		return ;
-	}
-	ipc->map = shared_mem;
-	ipc->game_state = &shared_mem[MAP_SIZE];
-	if (ipc->is_creator)
-	{
-		ft_memset(ipc->map, 0, MAP_SIZE * sizeof(int));
-		*(ipc->game_state) = WAITING;
-	}
-	ipc->semid = create_semaphore(SEM_KEY, ipc->is_creator);
-	if (ipc->semid == -1)
-	{
-		ft_putstr_fd("Error: failed to create semaphore\n", 2);
-		ipc->map = NULL;
-		ipc->game_state = NULL;
-		return ;
-	}
-	ipc->msgid = msgget(MSG_KEY, IPC_CREAT | IPC_EXCL | 0666);
-	if (ipc->msgid == -1)
-	{
-		ipc->msgid = msgget(MSG_KEY, 0666);
-		if (ipc->msgid == -1)
-		{
-			ft_putstr_fd("Error: msgget\n", 2);
-			ipc->map = NULL;
-			ipc->game_state = NULL;
-			return ;
-		}
-	}
-}
-
 int	main(int argc, char **argv)
 {
 	t_ipc		ipc;
