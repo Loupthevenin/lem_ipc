@@ -152,9 +152,11 @@ static float	group_cohesion(t_point *positions, int count, t_point center)
 	{
 		dist = abs(positions[i].x - center.x) + abs(positions[i].y - center.y);
 		if (dist == 0)
-			score += 1.0f;
+			score += 2.0f;
+		else if (dist == 1)
+			score += 1.5f;
 		else
-			score += 1.0f / (float)dist;
+			score += 1.0f / (dist * dist);
 		i++;
 	}
 	return (score);
