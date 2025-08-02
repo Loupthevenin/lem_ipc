@@ -85,12 +85,14 @@ int	create_semaphore(key_t key, int is_creator)
 	int			semid;
 	union semun	arg;
 
+	// Tente de créer un sémaphore de taille 1
 	semid = semget(key, 1, IPC_CREAT | IPC_EXCL | 0666);
 	if (semid != -1)
 	{
+		// Initialisation du sémaphore si le processus est créateur
 		if (is_creator)
 		{
-			arg.val = 1;
+			arg.val = 1; // Sémaphore libre
 			if (semctl(semid, 0, SETVAL, arg) == -1)
 			{
 				ft_putstr_fd("Error: semctl SETVAL\n", 2);

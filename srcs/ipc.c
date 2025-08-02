@@ -6,9 +6,11 @@ static int	init_shared_memory(t_ipc *ipc)
 	int	*shared_mem;
 
 	size = (MAP_SIZE + 1) * sizeof(int); // + 1 pour le game_state
+	// Tentative de création exclusive de la mémoire partagée
 	ipc->shmid = shmget(SHM_KEY, size, IPC_CREAT | IPC_EXCL | 0666);
 	if (ipc->shmid == -1)
 	{
+		// Si déjà créée, on s'y rattache sans créer donc pas créateur
 		ipc->shmid = shmget(SHM_KEY, size, 0666);
 		if (ipc->shmid == -1)
 			return (ft_putstr_fd("Error: shmget\n", 2), -1);
@@ -21,6 +23,7 @@ static int	init_shared_memory(t_ipc *ipc)
 		return (ft_putstr_fd("Error: shmat\n", 2), -1);
 	ipc->map = shared_mem;
 	ipc->game_state = &shared_mem[MAP_SIZE];
+	// Si on est le créateur, on initialise la carte et l'état
 	if (ipc->is_creator)
 	{
 		ft_memset(ipc->map, 0, MAP_SIZE * sizeof(int));
@@ -42,6 +45,7 @@ static int	init_message_queue(t_ipc *ipc)
 	ipc->msgid = msgget(MSG_KEY, IPC_CREAT | IPC_EXCL | 0666);
 	if (ipc->msgid == -1)
 	{
+		// S'il existe déjà, on le récupère
 		ipc->msgid = msgget(MSG_KEY, 0666);
 		if (ipc->msgid == -1)
 			return (ft_putstr_fd("Error: msgget\n", 2), -1);

@@ -76,18 +76,19 @@ typedef struct s_player
 
 typedef struct s_msg
 {
-	long						mtype;
+	long mtype; // Type du message pour filtrer
 	int							team_id;
 	int							x;
 	int							y;
 }								t_msg;
 
+// Union nécessaire pour certaines opérations de sémaphore
 union							semun
 {
-	int							val;
-	struct semid_ds				*buf;
-	unsigned short				*array;
-	struct seminfo				*__buf;
+	int val;               // Valeur du sémaphore
+	struct semid_ds *buf;  // Informations sur l'ensemble de sémaphores
+	unsigned short *array; // Tableau de valeurs pour SETALL
+	struct seminfo *__buf; // Infos internes (non utilisé)
 };
 
 extern volatile sig_atomic_t	g_exit;
@@ -118,8 +119,8 @@ int								received_team_position(t_ipc *ipc, int team_id,
 int								get_index(int x, int y);
 int								get_cell(int *map, int x, int y);
 void							set_cell(int *map, int x, int y, int value);
-t_point							get_adjacent_position(t_point origin,
-									int direction);
+t_point	get_adjacent_position(t_point origin,
+								int direction);
 void							display_map(int *map, t_args *args);
 void							safe_print(t_ipc *ipc, char *msg);
 int								count_alive_players(int *map);
