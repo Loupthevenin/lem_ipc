@@ -118,6 +118,8 @@ int								received_team_position(t_ipc *ipc, int team_id,
 int								get_index(int x, int y);
 int								get_cell(int *map, int x, int y);
 void							set_cell(int *map, int x, int y, int value);
+t_point							get_adjacent_position(t_point origin,
+									int direction);
 void							display_map(int *map, t_args *args);
 void							safe_print(t_ipc *ipc, char *msg);
 int								count_alive_players(int *map);

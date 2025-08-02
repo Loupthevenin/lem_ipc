@@ -9,19 +9,6 @@ static int	is_valid_move(int *map, int x, int y)
 	return (1);
 }
 
-static t_point	get_adjacent_position(t_point origin, int direction)
-{
-	if (direction == TOP)
-		return ((t_point){origin.x, origin.y - 1});
-	if (direction == BOTTOM)
-		return ((t_point){origin.x, origin.y + 1});
-	if (direction == LEFT)
-		return ((t_point){origin.x - 1, origin.y});
-	if (direction == RIGHT)
-		return ((t_point){origin.x + 1, origin.y});
-	return (origin);
-}
-
 static int	get_valid_moves(int *map, t_point origin, t_point *options)
 {
 	int		count;

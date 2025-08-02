@@ -1,18 +1,5 @@
 #include "../includes/lem_ipc.h"
 
-static t_point	get_adjacent_position(t_point origin, int direction)
-{
-	if (direction == TOP)
-		return ((t_point){origin.x, origin.y - 1});
-	if (direction == BOTTOM)
-		return ((t_point){origin.x, origin.y + 1});
-	if (direction == LEFT)
-		return ((t_point){origin.x - 1, origin.y});
-	if (direction == RIGHT)
-		return ((t_point){origin.x + 1, origin.y});
-	return (origin);
-}
-
 static void	kill_player(t_ipc *ipc, t_player *player, const char *reason)
 {
 	set_cell(ipc->map, player->x, player->y, 0);
@@ -190,34 +177,62 @@ void	quit_game_sigint(t_ipc *ipc, t_player *player)
 	exit(130);
 }
 
+static int	check_exit_requested(t_ipc *ipc, t_player *player)
+{
+	if (g_exit && player->alive)
+	{
+		quit_game_sigint(ipc, player);
+		return (1);
+	}
+	return (0);
+}
+
+static int	check_game_end(t_ipc *ipc, t_player *player)
+{
+	if (*(ipc->game_state) == END)
+	{
+		kill_player(ipc, player, "game ended");
+		return (1);
+	}
+	return (0);
+}
+
+static int	check_combat(t_ipc *ipc, t_player *player)
+{
+	if (count_adjacent_enemies(ipc->map, player) >= 2)
+	{
+		kill_player(ipc, player, "in combat");
+		return (1);
+	}
+	return (0);
+}
+
+static int	check_win_condition(t_ipc *ipc, t_player *player)
+{
+	if (count_alive_teams(ipc->map) <= 1)
+	{
+		print_team_win(player->team_id);
+		*(ipc->game_state) = END;
+		return (1);
+	}
+	return (0);
+}
+
 void	game_loop(t_ipc *ipc, t_player *player, t_args *args)
 {
-	int	state;
-
 	while (player->alive)
 	{
 		semaphore_wait(ipc->semid);
-		if (g_exit && player->alive)
-			quit_game_sigint(ipc, player);
-		state = *(ipc->game_state);
-		if (state == END && player->alive)
+		if (check_exit_requested(ipc, player) || check_game_end(ipc, player)
+			|| check_combat(ipc, player))
 		{
-			kill_player(ipc, player, "game ended");
-			semaphore_signal(ipc->semid);
-			break ;
-		}
-		if (count_adjacent_enemies(ipc->map, player) >= 2)
-		{
-			kill_player(ipc, player, "in combat");
 			semaphore_signal(ipc->semid);
 			break ;
 		}
 		move_player(ipc, player);
 		display_map(ipc->map, args);
-		if (count_alive_teams(ipc->map) <= 1)
+		if (check_win_condition(ipc, player))
 		{
-			print_team_win(player->team_id);
-			*(ipc->game_state) = END;
 			semaphore_signal(ipc->semid);
 			break ;
 		}

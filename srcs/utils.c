@@ -16,6 +16,19 @@ void	set_cell(int *map, int x, int y, int value)
 	map[get_index(x, y)] = value;
 }
 
+t_point	get_adjacent_position(t_point origin, int direction)
+{
+	if (direction == TOP)
+		return ((t_point){origin.x, origin.y - 1});
+	if (direction == BOTTOM)
+		return ((t_point){origin.x, origin.y + 1});
+	if (direction == LEFT)
+		return ((t_point){origin.x - 1, origin.y});
+	if (direction == RIGHT)
+		return ((t_point){origin.x + 1, origin.y});
+	return (origin);
+}
+
 void	display_map(int *map, t_args *args)
 {
 	int	y;
