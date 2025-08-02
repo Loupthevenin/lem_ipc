@@ -206,7 +206,6 @@ void	game_loop(t_ipc *ipc, t_player *player)
 		{
 			print_team_win(player->team_id);
 			*(ipc->game_state) = END;
-			kill_player(ipc, player, "game ended");
 			semaphore_signal(ipc->semid);
 			break ;
 		}

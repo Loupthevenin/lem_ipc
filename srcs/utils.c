@@ -175,11 +175,19 @@ void	cleanup(t_ipc *ipc)
 
 	semaphore_wait(ipc->semid);
 	alive_players = count_alive_players(ipc->map);
-	semaphore_signal(ipc->semid);
 	if (ipc->map)
 		shmdt(ipc->map);
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
-	if (alive_players == 0)
+	if (alive_players <= 1)
+	{
+		ft_printf("last\n");
+		semaphore_signal(ipc->semid);
 		destroy_ipc_resources(ipc->shmid, ipc->semid, ipc->msgid);
+	}
+	else
+	{
+		ft_printf("Not last\n");
+		semaphore_signal(ipc->semid);
+	}
 }
