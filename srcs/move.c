@@ -179,10 +179,34 @@ static t_point	find_closest_enemy(t_ipc *ipc, t_player *player)
 	return (closest);
 }
 
+static int	try_attack(t_ipc *ipc, t_player *player)
+{
+	t_point	enemy;
+
+	enemy = find_closest_enemy(ipc, player);
+	if (enemy.x != -1 && enemy.y != -1)
+		return (move_towards(ipc, player, enemy));
+	else
+		return (random_move(ipc, player));
+}
+
+static int	try_group(t_ipc *ipc, t_player *player, t_point *positions,
+		int count)
+{
+	t_point	center;
+
+	center = find_average_position(positions, count);
+	return (move_towards(ipc, player, center));
+}
+
+static int	try_explore(t_ipc *ipc, t_player *player)
+{
+	return (random_move(ipc, player));
+}
+
 int	move_player(t_ipc *ipc, t_player *player)
 {
-	t_point	target;
-	t_point	enemy;
+	t_point	center;
 	int		ally_count;
 	t_msg	buffer[10];
 	t_point	positions[10];
@@ -192,26 +216,21 @@ int	move_player(t_ipc *ipc, t_player *player)
 	ally_count = received_team_position(ipc, player->team_id, buffer, 10);
 	if (ally_count > 0)
 	{
+		// msg to positions
 		for (int i = 0; i < ally_count; i++)
 		{
 			positions[i].x = buffer[i].x;
 			positions[i].y = buffer[i].y;
 		}
-		target = find_average_position(positions, ally_count);
-		cohesion = group_cohesion(positions, ally_count, target);
+		center = find_average_position(positions, ally_count);
+		cohesion = group_cohesion(positions, ally_count, center);
 		if (cohesion >= 1.5f)
-		{
-			enemy = find_closest_enemy(ipc, player);
-			if (enemy.x != -1 && enemy.y != -1)
-				result = move_towards(ipc, player, enemy);
-			else
-				result = random_move(ipc, player);
-		}
+			result = try_attack(ipc, player);
 		else
-			result = move_towards(ipc, player, target);
+			result = try_group(ipc, player, positions, ally_count);
 	}
 	else
-		result = random_move(ipc, player);
+		result = try_explore(ipc, player);
 	send_player_position(ipc, player);
 	return (result);
 }
