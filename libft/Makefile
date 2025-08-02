@@ -6,7 +6,7 @@
 #    By: ltheveni <ltheveni@student.42.fr>          +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2024/11/12 18:30:28 by ltheveni          #+#    #+#              #
-#    Updated: 2025/05/04 13:52:02 by ltheveni         ###   ########.fr        #
+#    Updated: 2025/08/02 18:52:32 by ltheveni         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -27,6 +27,7 @@ SRCS = ft_isalpha.c\
 	   ft_tolower.c\
 	   ft_strchr.c\
 	   ft_strrchr.c\
+	   ft_strcmp.c\
 	   ft_strncmp.c\
 	   ft_memchr.c\
 	   ft_memcmp.c\
