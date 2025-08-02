@@ -169,7 +169,7 @@ void	wait_for_start(t_ipc *ipc, t_player *player)
 	}
 }
 
-static void	quit_game_sigint(t_ipc *ipc, t_player *player)
+void	quit_game_sigint(t_ipc *ipc, t_player *player)
 {
 	if (count_alive_players(ipc->map) > 1)
 	{
@@ -190,7 +190,7 @@ static void	quit_game_sigint(t_ipc *ipc, t_player *player)
 	exit(130);
 }
 
-void	game_loop(t_ipc *ipc, t_player *player)
+void	game_loop(t_ipc *ipc, t_player *player, t_args *args)
 {
 	int	state;
 
@@ -213,7 +213,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 			break ;
 		}
 		move_player(ipc, player);
-		display_map(ipc->map);
+		display_map(ipc->map, args);
 		if (count_alive_teams(ipc->map) <= 1)
 		{
 			print_team_win(player->team_id);

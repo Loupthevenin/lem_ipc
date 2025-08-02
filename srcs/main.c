@@ -2,32 +2,47 @@
 
 volatile sig_atomic_t	g_exit = 0;
 
-int	parse_team_id(int argc, char **argv)
+t_args	parse_args(int argc, char **argv)
 {
-	int	team_id;
+	t_args	args;
+	int		i;
 
-	if (argc > 2)
+	args.visual = 0;
+	args.team_id = -1;
+	if (argc > 3)
 	{
 		ft_putstr_fd("Usage: ./lemipc <team_id>\n", 2);
 		exit(EXIT_FAILURE);
 	}
-	if (argc == 2)
+	i = 1;
+	while (i < argc)
 	{
-		if (!is_number(argv[1]))
+		if (ft_strcmp(argv[i], "-v") == 0)
+			args.visual = 1;
+		else if (is_number(argv[i]))
 		{
-			ft_putstr_fd("Error: team_id must be a number\n", 2);
+			if (args.team_id != -1)
+			{
+				ft_putstr_fd("Error: Multiple team IDs provided\n", 2);
+				exit(EXIT_FAILURE);
+			}
+			args.team_id = ft_atoi(argv[i]);
+		}
+		else
+		{
+			ft_putstr_fd("Error: Invalid argument\n", 2);
 			exit(EXIT_FAILURE);
 		}
-		team_id = ft_atoi(argv[1]);
-		if (team_id < 1 || team_id > 9)
-		{
-			ft_putstr_fd("Error: team_id muste be between 1 and 9\n", 2);
-			exit(EXIT_FAILURE);
-		}
+		i++;
 	}
-	else
-		team_id = (rand() % 9) + 1;
-	return (team_id);
+	if (args.team_id == -1)
+		args.team_id = (rand() % 9) + 1;
+	if (args.team_id < 1 || args.team_id > 9)
+	{
+		ft_putstr_fd("Error: team_id must be between 1 and 9\n", 2);
+		exit(EXIT_FAILURE);
+	}
+	return (args);
 }
 
 // TODO: Actuellement l'ordre est random mais on peut placer les joueurs de manière a ce qu'il n'y ai pas de collision dès le depart;
@@ -60,10 +75,12 @@ int	main(int argc, char **argv)
 {
 	t_ipc		ipc;
 	t_player	player;
+	t_args		args;
 
 	srand(getpid());
 	signal(SIGINT, handle_sigint);
-	player.team_id = parse_team_id(argc, argv);
+	args = parse_args(argc, argv);
+	player.team_id = args.team_id;
 	player.player_id = getpid();
 	player.alive = 1;
 	if (g_exit)
@@ -85,7 +102,12 @@ int	main(int argc, char **argv)
 	else
 		wait_for_start(&ipc, &player);
 	if (!g_exit)
-		game_loop(&ipc, &player);
+		game_loop(&ipc, &player, &args);
+	else
+	{
+		semaphore_wait(ipc.semid);
+		quit_game_sigint(&ipc, &player);
+	}
 	cleanup(&ipc);
 	return (0);
 }

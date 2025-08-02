@@ -56,6 +56,12 @@ typedef struct s_point
 	int							y;
 }								t_point;
 
+typedef struct s_args
+{
+	int							team_id;
+	int							visual;
+}								t_args;
+
 typedef struct s_player
 {
 	int							team_id;
@@ -90,8 +96,10 @@ int								place_player(int *map, t_player *player);
 void							wait_for_teams(t_ipc *ipc, t_player *player,
 									int min_teams);
 void							wait_for_start(t_ipc *ipc, t_player *player);
-void							game_loop(t_ipc *ipc, t_player *player);
+void							game_loop(t_ipc *ipc, t_player *player,
+									t_args *args);
 int								move_player(t_ipc *ipc, t_player *player);
+void							quit_game_sigint(t_ipc *ipc, t_player *player);
 
 // SEMAPHORE
 int								create_semaphore(key_t key, int is_creator);
@@ -108,7 +116,7 @@ int								received_team_position(t_ipc *ipc, int team_id,
 int								get_index(int x, int y);
 int								get_cell(int *map, int x, int y);
 void							set_cell(int *map, int x, int y, int value);
-void							display_map(int *map);
+void							display_map(int *map, t_args *args);
 void							safe_print(t_ipc *ipc, char *msg);
 int								count_alive_players(int *map);
 void							destroy_ipc_resources(int shmid, int semid,

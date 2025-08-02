@@ -16,15 +16,15 @@ void	set_cell(int *map, int x, int y, int value)
 	map[get_index(x, y)] = value;
 }
 
-void	display_map(int *map)
+void	display_map(int *map, t_args *args)
 {
 	int	y;
 	int	x;
 	int	val;
 
 	y = 0;
-	// TODO: Mettre en place le visual avec le clear en argv ? bonus ?;
-	/* system("clear"); */
+	if (args->visual)
+		system("clear");
 	ft_printf("   ");
 	x = 0;
 	while (x < MAP_WIDTH)
