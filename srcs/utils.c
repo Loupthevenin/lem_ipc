@@ -179,7 +179,7 @@ void	cleanup(t_ipc *ipc)
 		shmdt(ipc->map);
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
-	if (alive_players <= 1)
+	if ((alive_players == 1 && !g_exit) || (alive_players == 0 && g_exit))
 	{
 		ft_printf("last\n");
 		semaphore_signal(ipc->semid);
