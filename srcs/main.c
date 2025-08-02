@@ -62,8 +62,9 @@ int	place_player(int *map, t_player *player)
 			set_cell(map, x, y, player->team_id);
 			player->x = x;
 			player->y = y;
-			player->last_pos.x = player->x;
-			player->last_pos.y = player->y;
+			for (int i = 0; i < HISTORY_SIZE; i++)
+				player->history[i] = (t_point){x, y};
+			player->history_index = 0;
 			return (0);
 		}
 		tries++;

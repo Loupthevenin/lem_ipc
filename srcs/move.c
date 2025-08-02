@@ -37,6 +37,19 @@ static int	get_valid_moves(int *map, t_point origin, t_point *options)
 	return (count);
 }
 
+static int	recently_visited(t_player *player, t_point pos)
+{
+	t_point	p;
+
+	for (int i = 0; i < HISTORY_SIZE; i++)
+	{
+		p = player->history[i];
+		if (p.x == pos.x && p.y == pos.y)
+			return (1);
+	}
+	return (0);
+}
+
 static void	update_player_position(t_ipc *ipc, t_player *player,
 		t_point new_pos)
 {
@@ -46,8 +59,9 @@ static void	update_player_position(t_ipc *ipc, t_player *player,
 	set_cell(ipc->map, new_pos.x, new_pos.y, player->team_id);
 	player->x = new_pos.x;
 	player->y = new_pos.y;
-	player->last_pos.x = player->x;
-	player->last_pos.y = player->y;
+	player->history[player->history_index] = new_pos;
+	// buffer circulaire (circular ring);
+	player->history_index = (player->history_index + 1) % HISTORY_SIZE;
 }
 
 static int	random_move(t_ipc *ipc, t_player *player)
@@ -63,8 +77,7 @@ static int	random_move(t_ipc *ipc, t_player *player)
 	i = 0;
 	while (i < count)
 	{
-		if (options[i].x != player->last_pos.x
-			|| options[i].y != player->last_pos.y)
+		if (!recently_visited(player, options[i]))
 		{
 			chosen = options[i];
 			break ;
@@ -93,8 +106,7 @@ static int	move_towards(t_ipc *ipc, t_player *player, t_point target)
 	for (int i = 0; i < count; i++)
 	{
 		// Empèche le retour à la case précédente
-		if (options[i].x == player->last_pos.x
-			&& options[i].y == player->last_pos.y)
+		if (recently_visited(player, options[i]))
 			continue ;
 		dist = abs(options[i].x - target.x) + abs(options[i].y - target.y);
 		if (dist < min_dist)
@@ -104,8 +116,8 @@ static int	move_towards(t_ipc *ipc, t_player *player, t_point target)
 		}
 	}
 	// Aucun meilleur choix que revenir
-	if (best.x == player->last_pos.x && best.y == player->last_pos.y)
-		best = options[0];
+	if (recently_visited(player, best))
+		best = options[rand() % count];
 	update_player_position(ipc, player, best);
 	return (1);
 }

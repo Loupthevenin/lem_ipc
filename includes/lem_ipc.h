@@ -26,6 +26,7 @@
 
 # define MIN_TEAMS_TO_START 2
 # define MAX_TEAMS 9
+# define HISTORY_SIZE 5
 
 # define SHM_KEY 0x1234
 # define SEM_KEY 0x1337
@@ -69,7 +70,8 @@ typedef struct s_player
 	int							y;
 	int							player_id;
 	int							alive;
-	t_point						last_pos;
+	t_point						history[HISTORY_SIZE];
+	int							history_index;
 }								t_player;
 
 typedef struct s_msg
