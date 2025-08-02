@@ -26,10 +26,7 @@ int	parse_team_id(int argc, char **argv)
 		}
 	}
 	else
-	{
 		team_id = (rand() % 9) + 1;
-		ft_printf("Random team assigned: %d\n", team_id);
-	}
 	return (team_id);
 }
 
@@ -69,13 +66,15 @@ int	main(int argc, char **argv)
 	player.team_id = parse_team_id(argc, argv);
 	player.player_id = getpid();
 	player.alive = 1;
+	if (g_exit)
+		return (0);
 	init_ipc(&ipc);
 	if (!ipc.map)
 		return (1);
 	semaphore_wait(ipc.semid);
 	if (place_player(ipc.map, &player) != 0)
 	{
-		ft_putstr_fd("Error: no place for player\n", 2);
+		ft_putstr_fd("Error: no place for player\n", 1);
 		semaphore_signal(ipc.semid);
 		cleanup(&ipc);
 		return (1);
@@ -87,8 +86,6 @@ int	main(int argc, char **argv)
 		wait_for_start(&ipc, &player);
 	if (!g_exit)
 		game_loop(&ipc, &player);
-	if (g_exit)
-		safe_print(&ipc, "SIGINT received, exiting gracefully...");
 	cleanup(&ipc);
 	return (0);
 }

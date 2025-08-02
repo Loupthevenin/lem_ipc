@@ -121,7 +121,7 @@ void	semaphore_signal(int semid)
 	sb.sem_flg = 0;
 	if (semop(semid, &sb, 1) == -1)
 	{
-		ft_putstr_fd("Error: semop signal", 2);
+		ft_putstr_fd("Error: semop signal\n", 2);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -179,15 +179,12 @@ void	cleanup(t_ipc *ipc)
 		shmdt(ipc->map);
 	if (ipc->game_state)
 		shmdt(ipc->game_state);
-	if ((alive_players == 1 && !g_exit) || (alive_players == 0 && g_exit))
+	if (alive_players == 1)
 	{
-		ft_printf("last\n");
+		ft_printf("cleanup all\n");
 		semaphore_signal(ipc->semid);
 		destroy_ipc_resources(ipc->shmid, ipc->semid, ipc->msgid);
 	}
 	else
-	{
-		ft_printf("Not last\n");
 		semaphore_signal(ipc->semid);
-	}
 }

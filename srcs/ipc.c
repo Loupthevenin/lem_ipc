@@ -57,6 +57,11 @@ void	init_ipc(t_ipc *ipc)
 	ipc->semid = -1;
 	ipc->msgid = -1;
 	ipc->is_creator = 0;
+	if (g_exit)
+	{
+		ft_putstr_fd("SIGINT detected, refusing to init IPCs\n", 2);
+		exit(EXIT_SUCCESS);
+	}
 	if (init_shared_memory(ipc) == -1 || init_semaphore(ipc) == -1
 		|| init_message_queue(ipc) == -1)
 	{

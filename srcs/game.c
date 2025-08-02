@@ -128,7 +128,7 @@ void	wait_for_teams(t_ipc *ipc, t_player *player, int min_teams)
 		{
 			semaphore_wait(ipc->semid);
 			*(ipc->game_state) = START;
-			ft_printf("Enough teams joined (%d), starting the game!\n",
+			ft_printf("Enough teams joined (%d)\n",
 						alive_teams);
 			semaphore_signal(ipc->semid);
 			break ;
@@ -158,12 +158,7 @@ void	wait_for_start(t_ipc *ipc, t_player *player)
 					state == WAITING ? "Waiting" : "Starting");
 		semaphore_signal(ipc->semid);
 		if (state != WAITING)
-		{
-			semaphore_wait(ipc->semid);
-			ft_printf("Game started\n");
-			semaphore_signal(ipc->semid);
 			break ;
-		}
 		sleep(1);
 	}
 	if (g_exit)
@@ -174,6 +169,27 @@ void	wait_for_start(t_ipc *ipc, t_player *player)
 	}
 }
 
+static void	quit_game_sigint(t_ipc *ipc, t_player *player)
+{
+	if (count_alive_players(ipc->map) > 1)
+	{
+		kill_player(ipc, player, "SIGINT");
+		if (ipc->map)
+			shmdt(ipc->map);
+		if (ipc->game_state)
+			shmdt(ipc->game_state);
+		semaphore_signal(ipc->semid);
+		exit(130);
+	}
+	if (ipc->map)
+		shmdt(ipc->map);
+	if (ipc->game_state)
+		shmdt(ipc->game_state);
+	semaphore_signal(ipc->semid);
+	destroy_ipc_resources(ipc->shmid, ipc->semid, ipc->msgid);
+	exit(130);
+}
+
 void	game_loop(t_ipc *ipc, t_player *player)
 {
 	int	state;
@@ -182,11 +198,7 @@ void	game_loop(t_ipc *ipc, t_player *player)
 	{
 		semaphore_wait(ipc->semid);
 		if (g_exit && player->alive)
-		{
-			kill_player(ipc, player, "SIGINT");
-			semaphore_signal(ipc->semid);
-			break ;
-		}
+			quit_game_sigint(ipc, player);
 		state = *(ipc->game_state);
 		if (state == END && player->alive)
 		{

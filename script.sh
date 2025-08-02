@@ -4,7 +4,7 @@ BIN="./lemipc"
 NUM_PLAYERS=10
 WAIT_TIME=15
 
-trap 'echo "SIGINT caught, killing players..."; kill_all_players; exit 1' SIGINT
+# trap 'echo "SIGINT caught, killing players..."; kill_all_players; exit 1' SIGINT
 
 function launch_players() {
 	local team1=$1
