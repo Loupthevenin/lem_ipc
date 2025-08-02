@@ -4,18 +4,21 @@ BIN="./lemipc"
 NUM_PLAYERS=10
 WAIT_TIME=15
 
-# trap 'echo "SIGINT caught, killing players..."; kill_all_players; exit 1' SIGINT
-
 function launch_players() {
 	local team1=$1
 	local team2=$2
 	local total=$3
+	local use_visual=$4
 	pids=()
 
 	echo "Launching $total players (Team $team1 and Team $team2)..."
 	for ((i = 1; i <= total; i++)); do
 		team=$((i % 2 == 0 ? team1 : team2))
-		$BIN $team &
+		if [ "$use_visual" = "1" ]; then
+			$BIN -v $team &
+		else
+			$BIN $team &
+		fi
 		pids+=($!)
 		sleep 0.1
 	done
@@ -48,9 +51,20 @@ function check_ipcs() {
 
 function stress_test() {
 	echo "=== Stress Test: $NUM_PLAYERS random players ==="
+	read -p "Enable visual mode ? (y/n): " visual_choice
+	if [[ "$visual_choice" =~ ^[Yy]$ ]]; then
+		use_visual=1
+	else
+		use_visual=0
+	fi
+
 	pids=()
 	for i in $(seq 1 $NUM_PLAYERS); do
-		$BIN &
+		if [ "$use_visual" = "1" ]; then
+			$BIN -v &
+		else
+			$BIN &
+		fi
 		pids+=($!)
 		sleep 0.2
 	done
@@ -71,7 +85,13 @@ function sigint_test() {
 
 function two_teams_game() {
 	echo "=== Two Teams Game Test ==="
-	launch_players 1 2 $NUM_PLAYERS
+	read -p "Enable visual mode ? (y/n): " visual_choice
+	if [[ "$visual_choice" =~ ^[Yy]$ ]]; then
+		use_visual=1
+	else
+		use_visual=0
+	fi
+	launch_players 1 2 $NUM_PLAYERS $use_visual
 	sleep $WAIT_TIME
 	kill_all_players
 }
@@ -82,6 +102,12 @@ function unbalanced_teams_game() {
 	read -p "Number of players in Team $t1: " t1_count
 	read -p "Team 2 ID: " t2
 	read -p "Number of players in Team $t2: " t2_count
+	read -p "Enable visual mode ? (y/n): " visual_choice
+	if [[ "$visual_choice" =~ ^[Yy]$ ]]; then
+		use_visual=1
+	else
+		use_visual=0
+	fi
 
 	total=$((t1_count + t2_count))
 	pids=()
@@ -89,12 +115,20 @@ function unbalanced_teams_game() {
 	echo "Launching $total players: $t1_count in Team $t1, $t2_count in Team $t2..."
 
 	for ((i = 0; i < t1_count; i++)); do
-		$BIN $t1 &
+		if [ "$use_visual" = "1" ]; then
+			$BIN -v "$t1" &
+		else
+			$BIN "$t1" &
+		fi
 		pids+=($!)
 		sleep 0.1
 	done
 	for ((i = 0; i < t2_count; i++)); do
-		$BIN $t2 &
+		if [ "$use_visual" = "1" ]; then
+			$BIN -v "$t2" &
+		else
+			$BIN "$t2" &
+		fi
 		pids+=($!)
 		sleep 0.1
 	done
@@ -119,7 +153,13 @@ function main_menu() {
 		read -p "Number of total players: " custom_players
 		read -p "Team 1 number: " t1
 		read -p "Team 2 number: " t2
-		launch_players "$t1" "$t2" "$custom_players"
+		read -p "Enable visual mode ? (y/n): " visual_choice
+		if [[ "$visual_choice" =~ ^[Yy]$ ]]; then
+			use_visual=1
+		else
+			use_visual=0
+		fi
+		launch_players "$t1" "$t2" "$custom_players" "$use_visual"
 		;;
 	6) exit 0 ;;
 	esac
