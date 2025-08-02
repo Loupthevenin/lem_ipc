@@ -50,6 +50,8 @@ int	place_player(int *map, t_player *player)
 			set_cell(map, x, y, player->team_id);
 			player->x = x;
 			player->y = y;
+			player->last_pos.x = player->x;
+			player->last_pos.y = player->y;
 			return (0);
 		}
 		tries++;

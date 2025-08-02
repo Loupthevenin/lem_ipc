@@ -101,7 +101,6 @@ function unbalanced_teams_game() {
 }
 
 function main_menu() {
-	clear
 	echo "==== LEMIPC Test Runner ===="
 	echo "1. Stress Test ($NUM_PLAYERS players)"
 	echo "2. SIGINT Test (clean exit)"

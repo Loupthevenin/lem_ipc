@@ -50,6 +50,12 @@ typedef struct s_ipc
 	int							*game_state;
 }								t_ipc;
 
+typedef struct s_point
+{
+	int							x;
+	int							y;
+}								t_point;
+
 typedef struct s_player
 {
 	int							team_id;
@@ -57,6 +63,7 @@ typedef struct s_player
 	int							y;
 	int							player_id;
 	int							alive;
+	t_point						last_pos;
 }								t_player;
 
 typedef struct s_msg
@@ -66,12 +73,6 @@ typedef struct s_msg
 	int							x;
 	int							y;
 }								t_msg;
-
-typedef struct s_point
-{
-	int							x;
-	int							y;
-}								t_point;
 
 union							semun
 {
