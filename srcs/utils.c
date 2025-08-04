@@ -196,7 +196,6 @@ void	cleanup(t_ipc *ipc)
 		shmdt(ipc->game_state);
 	if (alive_players == 1)
 	{
-		ft_printf("cleanup all\n");
 		semaphore_signal(ipc->semid);
 		destroy_ipc_resources(ipc->shmid, ipc->semid, ipc->msgid);
 	}
