@@ -36,27 +36,38 @@ static void	print_team_win(int team_id)
 	ft_printf("%sTeam %d wins the game!%s\n", color, team_id, RESET);
 }
 
-static int	count_adjacent_enemies(int *map, t_player *player)
+static int	is_die(int *map, t_player *player)
 {
-	int		count;
+	int		count_by_team[MAX_TEAMS + 1];
 	t_point	p;
-	t_point	next;
+	int		nx;
+	int		ny;
 	int		val;
 
+	ft_memset(count_by_team, 0, sizeof(int) * (MAX_TEAMS + 1));
 	p.x = player->x;
 	p.y = player->y;
-	count = 0;
-	for (int i = 0; i < 4; i++)
+	for (int dy = -1; dy <= 1; dy++)
 	{
-		next = get_adjacent_position(p, i);
-		if (next.x < 0 || next.x >= MAP_WIDTH || next.y < 0
-			|| next.y >= MAP_HEIGHT)
-			continue ;
-		val = get_cell(map, next.x, next.y);
-		if (val != 0 && val != player->team_id)
-			count++;
+		for (int dx = -1; dx <= 1; dx++)
+		{
+			if (dx == 0 && dy == 0)
+				continue ;
+			nx = p.x + dx;
+			ny = p.y + dy;
+			if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT)
+				continue ;
+			val = get_cell(map, nx, ny);
+			if (val != 0 && val != player->team_id && val < MAX_TEAMS + 1)
+				count_by_team[val]++;
+		}
 	}
-	return (count);
+	for (int i = 1; i < MAX_TEAMS + 1; i++)
+	{
+		if (count_by_team[i] >= 2)
+			return (1);
+	}
+	return (0);
 }
 
 static int	count_alive_teams(int *map)
@@ -199,7 +210,7 @@ static int	check_game_end(t_ipc *ipc, t_player *player)
 
 static int	check_combat(t_ipc *ipc, t_player *player)
 {
-	if (count_adjacent_enemies(ipc->map, player) >= 2)
+	if (is_die(ipc->map, player))
 	{
 		kill_player(ipc, player, "in combat");
 		return (1);
