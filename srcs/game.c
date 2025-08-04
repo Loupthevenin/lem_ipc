@@ -47,21 +47,26 @@ static int	is_die(int *map, t_player *player)
 	ft_memset(count_by_team, 0, sizeof(int) * (MAX_TEAMS + 1));
 	p.x = player->x;
 	p.y = player->y;
+	// Parcourir les 8 cases;
 	for (int dy = -1; dy <= 1; dy++)
 	{
 		for (int dx = -1; dx <= 1; dx++)
 		{
+			// case du joueur;
 			if (dx == 0 && dy == 0)
 				continue ;
 			nx = p.x + dx;
 			ny = p.y + dy;
+			// limites du tab;
 			if (nx < 0 || nx >= MAP_WIDTH || ny < 0 || ny >= MAP_HEIGHT)
 				continue ;
 			val = get_cell(map, nx, ny);
+			// si la case est occupé par un joueur
 			if (val != 0 && val != player->team_id && val < MAX_TEAMS + 1)
 				count_by_team[val]++;
 		}
 	}
+	// Si + de 2 alors kill;
 	for (int i = 1; i < MAX_TEAMS + 1; i++)
 	{
 		if (count_by_team[i] >= 2)

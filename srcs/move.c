@@ -135,13 +135,18 @@ static float	group_cohesion(t_point *positions, int count, t_point center)
 
 	i = 0;
 	score = 0.0f;
+	// Parcout toutes les positions des alliés
 	while (i < count)
 	{
+		// Distance de Manhattan
 		dist = abs(positions[i].x - center.x) + abs(positions[i].y - center.y);
+		// Si la position est exactement au centre => gros bonus;
 		if (dist == 0)
 			score += 2.0f;
+		// Si la position est adjacente => moyen;
 		else if (dist == 1)
 			score += 1.5f;
+		// Sinon on ajoute un score inversement proportionnel au carré de la distance;
 		else
 			score += 1.0f / (dist * dist);
 		i++;
@@ -164,8 +169,10 @@ static t_point	find_closest_enemy(t_ipc *ipc, t_player *player)
 		for (int x = 0; x < MAP_WIDTH; x++)
 		{
 			cell = get_cell(ipc->map, x, y);
+			// Pas vide + contient un ennemi
 			if (cell != 0 && cell != player->team_id)
 			{
+				// Calcul de distance Manhattan
 				dist = abs(player->x - x) + abs(player->y - y);
 				if (dist < min_dist)
 				{
